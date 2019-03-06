@@ -1,6 +1,6 @@
 #ifndef FILTERS_H
 #define FILTERS_H
-
+#include "bitmap.h"
 
 pixel_24bit average(pixel_24bit **matrix, int sizev, int sizeh);
 

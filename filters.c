@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "filters.h"
+#include "bitmap.h"
 
 pixel_24bit median(pixel_24bit **matrix, int sizev, int sizeh)
 {

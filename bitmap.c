@@ -244,13 +244,13 @@ void filter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader,
 			for(int n = 0; n < addWidth; n++)
 			{
 				if(filt == 'a')
-					bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+					bitmap[m + window * i][n + window * horCount] = median(matrix1, window, addWidth);
 				else if(filt == 'b')
-					bitmap[m + window * i][n + window * j] = average(matrix, window, window);
+					bitmap[m + window * i][n + window * horCount] = average(matrix1, window, addWidth);
 				else if(filt== 'c')
-					bitmap[m + window * i][n + window * j] = max(matrix, window, window);
+					bitmap[m + window * i][n + window * horCount] = max(matrix1, window, addWidth);
 				else if(filt== 'd')
-					bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
+					bitmap[m + window * i][n + window * horCount] = minimal(matrix1, window, addWidth);
 			}
 		}
 		for(int o = 0; o < window; o++)	
@@ -278,13 +278,13 @@ void filter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader,
 			for(int n = 0; n < window; n++)
 			{
 				if(filt == 'a')
-					bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+					bitmap[m + window * vertCount][n + window * j] = median(matrix2, addHeight, window);
 				else if(filt == 'b')
-					bitmap[m + window * i][n + window * j] = average(matrix, window, window);
+					bitmap[m + window * vertCount][n + window * j] = average(matrix2, addHeight, window);
 				else if(filt== 'c')
-					bitmap[m + window * i][n + window * j] = max(matrix, window, window);
+					bitmap[m + window * vertCount][n + window * j] = max(matrix2, addHeight, window);
 				else if(filt== 'd')
-					bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
+					bitmap[m + window * vertCount][n + window * j] = minimal(matrix2, addHeight, window);
 			}
 		}
 		for(int o = 0; o < addHeight; o++)
@@ -309,13 +309,13 @@ void filter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader,
 		for(int n = 0; n < addWidth; n++)
 		{
 			if(filt == 'a')
-				bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+				bitmap[m + window * vertCount][n + window * horCount] = median(matrix3, addHeight, addWidth);
 			else if(filt == 'b')
-				bitmap[m + window * i][n + window * j] = average(matrix, window, window);
+				bitmap[m + window * vertCount][n + window * horCount] = average(matrix3, addHeight, addWidth);
 			else if(filt== 'c')
-				bitmap[m + window * i][n + window * j] = max(matrix, window, window);
+				bitmap[m + window * vertCount][n + window * horCount] = max(matrix3, addHeight, addWidth);
 			else if(filt== 'd')
-				bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
+				bitmap[m + window * vertCount][n + window * horCount] = minimal(matrix3, addHeight, addWidth);
 		}
 	}
 	for(int o = 0; o < addHeight; o++)

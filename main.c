@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
 	}
 	BITMAPINFOHEADER bitmapInfoHeader;
 	BITMAPFILEHEADER bitmapFileHeader;
-    	pixel **bitmapData;
-    	char menu[3], window[6];
+    	pixel_24bit **bitmapData;
+    	char menu[3], window[6], filt;
     	int windowSize = 0;
     	bitmapData = LoadBitmapFile(argv[1], &bitmapInfoHeader, &bitmapFileHeader);
 	if(err == 1)
@@ -49,24 +49,28 @@ int main(int argc, char* argv[])
     		
     		if(menu[0] == '1')
     		{
+				filt = 'a';
     			windowSize = scanSize(window, bitmapInfoHeader);
-    			medianFilter(bitmapData, windowSize, bitmapInfoHeader);
+    			filter(bitmapData, windowSize, bitmapInfoHeader, filt);
     			
     		}
     		else if(menu[0] == '2')
     		{
+				filt = 'b';
     			windowSize = scanSize(window, bitmapInfoHeader);
-    			averageFilter(bitmapData, windowSize, bitmapInfoHeader);
+    			filter(bitmapData, windowSize, bitmapInfoHeader, filt);
     		}
     		else if(menu[0] == '3')
     		{
+				filt = 'd';
     			windowSize = scanSize(window, bitmapInfoHeader);
-    			minimalFilter(bitmapData, windowSize, bitmapInfoHeader);
+    			filter(bitmapData, windowSize, bitmapInfoHeader, filt);
     		}
     		else if(menu[0] == '4')
     		{
+				filt = 'c';
     			windowSize = scanSize(window, bitmapInfoHeader);
-    			maxFilter(bitmapData, windowSize, bitmapInfoHeader);
+    			maxFilter(bitmapData, windowSize, bitmapInfoHeader, filt);
     		}
     		else if(menu[0] == '5')
     		{
