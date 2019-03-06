@@ -181,46 +181,9 @@ int cmpfunc (const void * a, const void * b) {
    return ( *(unsigned char*)a - *(unsigned char*)b );
 }
 
-pixel_24bit median(pixel_24bit **matrix, int sizev, int sizeh)
-{
-	unsigned char medianB, medianG, medianR;
-	unsigned char *B = malloc(sizev*sizeh), *G = malloc(sizev*sizeh), *R = malloc(sizev*sizeh);
-	allocCheck(B);
-	allocCheck(G);
-	allocCheck(R);
-	for(int i = 0; i < sizev; i++)
-	{
-		for(int j = 0; j < sizeh; j++)
-		{
-			B[j + i*sizeh] = matrix[i][j].b;
-			G[j + i*sizeh] = matrix[i][j].g;
-			R[j + i*sizeh] = matrix[i][j].r;
-		}
-	}
-	qsort(B, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	qsort(G, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	qsort(R, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	if((sizev*sizeh) % 2 == 0)
-	{
-		medianB = (B[(sizev*sizeh)/2]+B[(sizev*sizeh)/2 - 1])/2;
-		medianG = (G[(sizev*sizeh)/2]+G[(sizev*sizeh)/2 - 1])/2;
-		medianR = (R[(sizev*sizeh)/2]+R[(sizev*sizeh)/2 - 1])/2;
-	}
-	else
-	{
-		medianB = B[(sizev*sizeh)/2];
-		medianG = G[(sizev*sizeh)/2];
-		medianR = R[(sizev*sizeh)/2];
-	}
-	free(B);
-	free(G);
-	free(R);
-	pixel_24bit result = {medianB, medianG, medianR};
-	return result;
-}
 
 
-void medianFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader)
+void filter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader, char filt)
 {
 	int vertCount = bitmapInfoHeader.biHeight / window;
 	int horCount = bitmapInfoHeader.biWidth / window;
@@ -243,7 +206,14 @@ void medianFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoH
 			{
 				for(int n = 0; n < window; n++)
 				{
-					bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+					if(filt == 'a')
+						bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+					else if(filt == 'b')
+						bitmap[m + window * i][n + window * j] = average(matrix, window, window);
+					else if(filt== 'c')
+						bitmap[m + window * i][n + window * j] = max(matrix, window, window);
+					else if(filt== 'd')
+						bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
 				}
 			}
 			for(int o = 0; o < window; o++)
@@ -273,7 +243,14 @@ void medianFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoH
 		{
 			for(int n = 0; n < addWidth; n++)
 			{
-				bitmap[m + window * i][n + window * horCount] = median(matrix1, window, addWidth);
+				if(filt == 'a')
+					bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+				else if(filt == 'b')
+					bitmap[m + window * i][n + window * j] = average(matrix, window, window);
+				else if(filt== 'c')
+					bitmap[m + window * i][n + window * j] = max(matrix, window, window);
+				else if(filt== 'd')
+					bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
 			}
 		}
 		for(int o = 0; o < window; o++)	
@@ -300,7 +277,14 @@ void medianFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoH
 		{
 			for(int n = 0; n < window; n++)
 			{
-				bitmap[m + window * vertCount][n + window * j] = median(matrix2, addHeight, window);
+				if(filt == 'a')
+					bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+				else if(filt == 'b')
+					bitmap[m + window * i][n + window * j] = average(matrix, window, window);
+				else if(filt== 'c')
+					bitmap[m + window * i][n + window * j] = max(matrix, window, window);
+				else if(filt== 'd')
+					bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
 			}
 		}
 		for(int o = 0; o < addHeight; o++)
@@ -324,7 +308,14 @@ void medianFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoH
 	{
 		for(int n = 0; n < addWidth; n++)
 		{
-			bitmap[m + window * vertCount][n + window * horCount] = median(matrix3, addHeight, addWidth);
+			if(filt == 'a')
+				bitmap[m + window * i][n + window * j] = median(matrix, window, window);
+			else if(filt == 'b')
+				bitmap[m + window * i][n + window * j] = average(matrix, window, window);
+			else if(filt== 'c')
+				bitmap[m + window * i][n + window * j] = max(matrix, window, window);
+			else if(filt== 'd')
+				bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
 		}
 	}
 	for(int o = 0; o < addHeight; o++)
@@ -332,435 +323,6 @@ void medianFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoH
 		
 	free(matrix3);
 }	
-
-pixel_24bit average(pixel_24bit **matrix, int sizev, int sizeh)
-{
-	unsigned char averageB, averageG, averageR;
-	unsigned char *B = malloc(sizev*sizeh), *G = malloc(sizev*sizeh), *R = malloc(sizev*sizeh);
-	allocCheck(B);
-	allocCheck(G);
-	allocCheck(R);
-	for(int i = 0; i < sizev; i++)
-	{
-		for(int j = 0; j < sizeh; j++)
-		{
-			B[j + i*sizeh] = matrix[i][j].b;
-			G[j + i*sizeh] = matrix[i][j].g;
-			R[j + i*sizeh] = matrix[i][j].r;
-		}
-	}
-	int helpB = 0, helpG=0, helpR=0;
-	for(int i = 0; i < sizev*sizeh; i++)
-		{
-			helpB += B[i];
-			helpG += G[i];
-			helpR += R[i];
-		}
-	averageB = helpB/(sizev*sizeh);
-	averageG = helpG/(sizev*sizeh);
-	averageR = helpR/(sizev*sizeh);
-	free(B);
-	free(G);
-	free(R);
-	pixel_24bit result = {averageB, averageG, averageR};
-	return result;
-}
-
-void averageFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader)
-{
-	int vertCount = bitmapInfoHeader.biHeight / window;
-	int horCount = bitmapInfoHeader.biWidth / window;
-	for(int i = 0; i < vertCount; i++)
-	{
-		for(int j = 0; j < horCount; j++)
-		{
-			pixel_24bit** matrix = malloc(window*sizeof(pixel_24bit*));
-			allocCheck(matrix);
-			for(int k = 0; k < window; k++)
-			{
-				pixel_24bit* row = malloc(window*sizeof(pixel_24bit));
-				for(int l = 0; l < window; l++)
-
-				{
-					row[l] = bitmap[k + window * i][l + window * j];
-				}
-				matrix[k] = row;
-			}
-			for(int m = 0; m < window; m++)
-			{
-				for(int n = 0; n < window; n++)
-				{
-					bitmap[m + window * i][n + window * j] = average(matrix, window, window);
-				}
-			}
-			for(int o = 0; o < window; o++)
-				free(matrix[o]);
-				
-			free(matrix);
-		}
-			
-	}
-	int addWidth = bitmapInfoHeader.biWidth % window;
-	for(int i = 0; i < vertCount; i++)
-	{
-	
-		pixel_24bit** matrix1 = malloc(window*sizeof(pixel_24bit*));
-		allocCheck(matrix1);
-		for(int k = 0; k < window; k++)
-		{
-			pixel_24bit* row1 = malloc(addWidth*sizeof(pixel_24bit));
-			for(int l = 0; l < addWidth; l++)
-			{
-				row1[l] = bitmap[k + window * i][l + window*horCount];
-			}
-			matrix1[k] = row1;
-		}
-		for(int m = 0; m < window; m++)
-		{
-			for(int n = 0; n < addWidth; n++)
-			{
-				bitmap[m + window * i][n + window * horCount] = average(matrix1, window, addWidth);
-			}
-		}
-		for(int o = 0; o < window; o++)	
-			free(matrix1[o]);
-				
-		free(matrix1);
-			
-	}
-	int addHeight = bitmapInfoHeader.biHeight % window;
-	for(int j = 0; j < horCount; j++)
-	{
-		pixel_24bit** matrix2 = malloc(addHeight*sizeof(pixel_24bit*));
-		allocCheck(matrix2);
-		for(int k = 0; k < addHeight; k++)
-		{
-			pixel_24bit* row2 = malloc(window*sizeof(pixel_24bit));
-			for(int l = 0; l < window; l++)
-			{
-				row2[l] = bitmap[k + window * vertCount][l + window * j];
-			}
-			matrix2[k] = row2;
-		}
-		for(int m = 0; m <addHeight; m++)
-		{
-			for(int n = 0; n < window; n++)
-			{
-				bitmap[m + window * vertCount][n + window * j] = average(matrix2, addHeight, window);
-			}
-		}
-		for(int o = 0; o < addHeight; o++)
-			free(matrix2[o]);
-			
-		free(matrix2);
-	}
-	
-	pixel_24bit** matrix3 = malloc(addHeight*sizeof(pixel_24bit*));
-	allocCheck(matrix3);
-	for(int k = 0; k < addHeight; k++)
-	{
-		pixel_24bit *row3 = malloc(addWidth*sizeof(pixel_24bit));
-		for(int l = 0; l < addWidth; l++)
-		{
-			row3[l] = bitmap[k + window * vertCount][l + window * horCount];
-		}
-		matrix3[k] = row3;
-	}	
-	for(int m = 0; m <addHeight; m++)
-	{
-		for(int n = 0; n < addWidth; n++)
-		{
-			bitmap[m + window * vertCount][n + window * horCount] = average(matrix3, addHeight, addWidth);
-
-		}
-	}
-	for(int o = 0; o < addHeight; o++)
-		free(matrix3[o]);
-		
-	free(matrix3);
-}
-
-pixel_24bit minimal(pixel_24bit **matrix, int sizev, int sizeh)
-{
-	unsigned char minB, minG, minR;
-	unsigned char *B = malloc(sizev*sizeh), *G = malloc(sizev*sizeh), *R = malloc(sizev*sizeh);
-	allocCheck(B);
-	allocCheck(G);
-	allocCheck(R);
-	for(int i = 0; i < sizev; i++)
-	{
-		for(int j = 0; j < sizeh; j++)
-		{
-			B[j + i*sizeh] = matrix[i][j].b;
-			G[j + i*sizeh] = matrix[i][j].g;
-			R[j + i*sizeh] = matrix[i][j].r;
-		}
-	}
-	qsort(B, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	qsort(G, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	qsort(R, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	minB = B[0];
-	minG = G[0];
-	minR = R[0];
-	free(B);
-	free(G);
-	free(R);
-	pixel_24bit result = {minB, minG, minR};
-	return result;
-}
-
-void minimalFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader)
-{
-	int vertCount = bitmapInfoHeader.biHeight / window;
-	int horCount = bitmapInfoHeader.biWidth / window;
-	for(int i = 0; i < vertCount; i++)
-	{
-		for(int j = 0; j < horCount; j++)
-		{
-			pixel_24bit** matrix = malloc(window*sizeof(pixel_24bit*));
-			allocCheck(matrix);
-			for(int k = 0; k < window; k++)
-			{
-				pixel_24bit* row = malloc(window*sizeof(pixel_24bit));
-				for(int l = 0; l < window; l++)
-				{
-					row[l] = bitmap[k + window * i][l + window * j];
-				}
-				matrix[k] = row;
-			}
-			for(int m = 0; m < window; m++)
-			{
-				for(int n = 0; n < window; n++)
-				{
-					bitmap[m + window * i][n + window * j] = minimal(matrix, window, window);
-				}
-			}
-			for(int o = 0; o < window; o++)
-				free(matrix[o]);
-				
-			free(matrix);
-		}
-			
-	}
-	int addWidth = bitmapInfoHeader.biWidth % window;
-	for(int i = 0; i < vertCount; i++)
-	{
-	
-		pixel_24bit** matrix1 = malloc(window*sizeof(pixel_24bit*));
-		allocCheck(matrix1);
-		for(int k = 0; k < window; k++)
-		{
-			pixel_24bit* row1 = malloc(addWidth*sizeof(pixel_24bit));
-			for(int l = 0; l < addWidth; l++)
-			{
-				row1[l] = bitmap[k + window * i][l + window*horCount];
-			}
-			matrix1[k] = row1;
-		}
-		for(int m = 0; m < window; m++)
-		{
-			for(int n = 0; n < addWidth; n++)
-			{
-				bitmap[m + window * i][n + window * horCount] = minimal(matrix1, window, addWidth);
-			}
-		}
-		for(int o = 0; o < window; o++)	
-			free(matrix1[o]);
-				
-		free(matrix1);
-			
-	}
-	int addHeight = bitmapInfoHeader.biHeight % window;
-	for(int j = 0; j < horCount; j++)
-	{
-		pixel_24bit** matrix2 = malloc(addHeight*sizeof(pixel_24bit*));
-		allocCheck(matrix2);
-		for(int k = 0; k < addHeight; k++)
-		{
-			pixel_24bit* row2 = malloc(window*sizeof(pixel_24bit));
-			for(int l = 0; l < window; l++)
-			{
-				row2[l] = bitmap[k + window * vertCount][l + window * j];
-			}
-			matrix2[k] = row2;
-		}
-		for(int m = 0; m <addHeight; m++)
-		{
-			for(int n = 0; n < window; n++)
-			{
-				bitmap[m + window * vertCount][n + window * j] = minimal(matrix2, addHeight, window);
-			}
-		}
-		for(int o = 0; o < addHeight; o++)
-			free(matrix2[o]);
-			
-		free(matrix2);
-	}
-	
-	pixel_24bit** matrix3 = malloc(addHeight*sizeof(pixel_24bit*));
-	allocCheck(matrix3);
-	for(int k = 0; k < addHeight; k++)
-	{
-		pixel_24bit *row3 = malloc(addWidth*sizeof(pixel_24bit));
-		for(int l = 0; l < addWidth; l++)
-		{
-			row3[l] = bitmap[k + window * vertCount][l + window * horCount];
-		}
-		matrix3[k] = row3;
-	}	
-	for(int m = 0; m <addHeight; m++)
-	{
-		for(int n = 0; n < addWidth; n++)
-		{
-			bitmap[m + window * vertCount][n + window * horCount] = minimal(matrix3, addHeight, addWidth);
-		}
-	}
-	for(int o = 0; o < addHeight; o++)
-		free(matrix3[o]);
-		
-	free(matrix3);
-}
-
-pixel_24bit max(pixel_24bit **matrix, int sizev, int sizeh)
-{
-	unsigned char maxB, maxG, maxR;
-	unsigned char *B = malloc(sizev*sizeh), *G = malloc(sizev*sizeh), *R = malloc(sizev*sizeh);
-	allocCheck(B);
-	allocCheck(G);
-	allocCheck(R);
-	for(int i = 0; i < sizev; i++)
-	{
-		for(int j = 0; j < sizeh; j++)
-		{
-			B[j + i*sizeh] = matrix[i][j].b;
-			G[j + i*sizeh] = matrix[i][j].g;
-			R[j + i*sizeh] = matrix[i][j].r;
-		}
-	}
-	qsort(B, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	qsort(G, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	qsort(R, sizev*sizeh, sizeof(unsigned char), cmpfunc);
-	maxB = B[sizev*sizeh - 1];
-	maxG = G[sizev*sizeh - 1];
-	maxR = R[sizev*sizeh - 1];
-	free(B);
-	free(G);
-	free(R);
-	pixel_24bit result = {maxB, maxG, maxR};
-	return result;
-}
-
-void maxFilter(pixel_24bit** bitmap, int window, BITMAPINFOHEADER bitmapInfoHeader)
-{
-	int vertCount = bitmapInfoHeader.biHeight / window;
-	int horCount = bitmapInfoHeader.biWidth / window;
-	for(int i = 0; i < vertCount; i++)
-	{
-		for(int j = 0; j < horCount; j++)
-		{
-			pixel_24bit** matrix = malloc(window*sizeof(pixel_24bit*));
-			allocCheck(matrix);
-			for(int k = 0; k < window; k++)
-			{
-				pixel_24bit* row = malloc(window*sizeof(pixel_24bit));
-				for(int l = 0; l < window; l++)
-				{
-					row[l] = bitmap[k + window * i][l + window * j];
-				}
-				matrix[k] = row;
-			}
-			for(int m = 0; m < window; m++)
-			{
-				for(int n = 0; n < window; n++)
-				{
-					bitmap[m + window * i][n + window * j] = max(matrix, window, window);
-				}
-			}
-			for(int o = 0; o < window; o++)
-				free(matrix[o]);
-				
-			free(matrix);
-		}
-			
-	}
-	int addWidth = bitmapInfoHeader.biWidth % window;
-	for(int i = 0; i < vertCount; i++)
-	{
-	
-		pixel_24bit** matrix1 = malloc(window*sizeof(pixel_24bit*));
-		allocCheck(matrix1);
-		for(int k = 0; k < window; k++)
-		{
-			pixel_24bit* row1 = malloc(addWidth*sizeof(pixel_24bit));
-			for(int l = 0; l < addWidth; l++)
-			{
-				row1[l] = bitmap[k + window * i][l + window*horCount];
-			}
-			matrix1[k] = row1;
-		}
-		for(int m = 0; m < window; m++)
-		{
-			for(int n = 0; n < addWidth; n++)
-			{
-				bitmap[m + window * i][n + window * horCount] = max(matrix1, window, addWidth);
-			}
-		}
-		for(int o = 0; o < window; o++)	
-			free(matrix1[o]);
-				
-		free(matrix1);
-			
-	}
-	int addHeight = bitmapInfoHeader.biHeight % window;
-	for(int j = 0; j < horCount; j++)
-	{
-		pixel_24bit** matrix2 = malloc(addHeight*sizeof(pixel_24bit*));
-		allocCheck(matrix2);
-		for(int k = 0; k < addHeight; k++)
-		{
-			pixel_24bit* row2 = malloc(window*sizeof(pixel_24bit));
-			for(int l = 0; l < window; l++)
-			{
-				row2[l] = bitmap[k + window * vertCount][l + window * j];
-			}
-			matrix2[k] = row2;
-		}
-		for(int m = 0; m <addHeight; m++)
-		{
-			for(int n = 0; n < window; n++)
-			{
-				bitmap[m + window * vertCount][n + window * j] = max(matrix2, addHeight, window);
-			}
-		}
-		for(int o = 0; o < addHeight; o++)
-			free(matrix2[o]);
-			
-		free(matrix2);
-	}
-	
-	pixel_24bit** matrix3 = malloc(addHeight*sizeof(pixel_24bit*));
-	allocCheck(matrix3);
-	for(int k = 0; k < addHeight; k++)
-	{
-		pixel_24bit *row3 = malloc(addWidth*sizeof(pixel_24bit));
-		for(int l = 0; l < addWidth; l++)
-		{
-			row3[l] = bitmap[k + window * vertCount][l + window * horCount];
-		}
-		matrix3[k] = row3;
-	}	
-	for(int m = 0; m <addHeight; m++)
-	{
-		for(int n = 0; n < addWidth; n++)
-		{
-			bitmap[m + window * vertCount][n + window * horCount] = max(matrix3, addHeight, addWidth);
-		}
-	}
-	for(int o = 0; o < addHeight; o++)
-		free(matrix3[o]);
-		
-	free(matrix3);
-}
 
 int CharToInt(char c)
 {

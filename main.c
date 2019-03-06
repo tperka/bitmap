@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "bitmap.h"
+#include "filters.h"
 
 extern int err;
 
